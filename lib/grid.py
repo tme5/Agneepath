@@ -1,7 +1,7 @@
 import pygame
 import math
 from queue import PriorityQueue
-from constants import *
+from .constants import *
 
 class Spot:
     def __init__(self, row, col, width, total_rows):

@@ -1,7 +1,7 @@
-from grid import Spot
-from operations import *
-from constants import *
 import time
+from lib.grid import Spot
+from lib.operations import *
+from lib.constants import *
 
 class Agneepath:
     def __init__(self):

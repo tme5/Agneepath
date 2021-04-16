@@ -1,5 +1,5 @@
 import math
-from grid import *
+from .grid import *
 
 def heuristic(p1, p2):
     x1, y1 = p1
