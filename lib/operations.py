@@ -1,5 +1,12 @@
 import math
 from .grid import *
+import os
+import time 
+
+cwd = os.getcwd()
+man = pygame.image.load(os.path.join(cwd, 'lib\\images\\man.jpg'))
+fire = pygame.image.load(os.path.join(cwd, 'lib\\images\\fire.jpg'))
+door = pygame.image.load(os.path.join(cwd, 'lib\\images\\door.jpg'))
 
 def heuristic(p1, p2):
     x1, y1 = p1
@@ -47,7 +54,8 @@ def algorithm(draw, grid, start, end):
 def reconstruct_path(came_from, current, draw):
     while current in came_from:
         current = came_from[current]
-        current.make_path()
+        if not current.is_end():
+            current.make_path()
         draw()
 
 def make_grid(rows, width):
@@ -60,24 +68,54 @@ def make_grid(rows, width):
             grid[i].append(spot)
     return grid
 
+def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=3):
+    x1, y1 = start_pos
+    x2, y2 = end_pos
+    dl = dash_length
+
+    if (x1 == x2):
+        ycoords = [y for y in range(y1, y2, dl if y1 < y2 else -dl)]
+        xcoords = [x1] * len(ycoords)
+    elif (y1 == y2):
+        xcoords = [x for x in range(x1, x2, dl if x1 < x2 else -dl)]
+        ycoords = [y1] * len(xcoords)
+    else:
+        a = abs(x2 - x1)
+        b = abs(y2 - y1)
+        c = round(math.sqrt(a**2 + b**2))
+        dx = dl * a / c
+        dy = dl * b / c
+
+        xcoords = [x for x in numpy.arange(x1, x2, dx if x1 < x2 else -dx)]
+        ycoords = [y for y in numpy.arange(y1, y2, dy if y1 < y2 else -dy)]
+
+    next_coords = list(zip(xcoords[1::2], ycoords[1::2]))
+    last_coords = list(zip(xcoords[0::2], ycoords[0::2]))
+    for (x1, y1), (x2, y2) in zip(next_coords, last_coords):
+        start = (round(x1), round(y1))
+        end = (round(x2), round(y2))
+        pygame.draw.line(surf, color, start, end, width)
 
 def draw_grid(win, rows, width):
     gap = width // rows
     for i in range(rows):
-        pygame.draw.line(win, GREY, (0, i * gap), (width, i * gap))
+        draw_dashed_line(win, BLACK, (0, i * gap), (width, i * gap))
         for j in range(rows):
-            pygame.draw.line(win, GREY, (j * gap, 0), (j * gap, width))
+            draw_dashed_line(win, BLACK, (j * gap, 0), (j * gap, width))
 
-
-def draw(win, grid, rows, width):
-    win.fill(WHITE)
+def draw(win, grid, rows, width):        
+    win.fill(GREEN)
     for row in grid:
         for spot in row:
             spot.draw(win)
-
+            if spot.is_start():
+                win.blit(man.convert(), (spot.x, spot.y))
+            if spot.is_barrier():
+                win.blit(fire.convert(), (spot.x, spot.y))
+            if spot.is_end():
+                win.blit(door.convert(), (spot.x, spot.y))
     draw_grid(win, rows, width)
     pygame.display.update()
-
 
 def get_clicked_pos(pos, rows, width):
     gap = width // rows

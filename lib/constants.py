@@ -2,6 +2,7 @@
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 255, 0)
+TILE = (210, 210, 230)
 YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -11,5 +12,5 @@ GREY = (128, 128, 128)
 TURQUOISE = (64, 224, 208)
 
 # Window configuration
-WIDTH = 500
-TOTAL_ROWS = 30
+WIDTH = 600
+TOTAL_ROWS = 20

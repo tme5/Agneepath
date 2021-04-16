@@ -6,8 +6,8 @@ from lib.constants import *
 class Agneepath:
     def __init__(self):
         self.win = pygame.display.set_mode((WIDTH, WIDTH))
-        pygame.display.set_caption("A* Path Finding Algorithm")
-
+        pygame.display.set_caption("Agneepath Incremental Pathfinding Algorithm")
+        
     def main(self):
         grid = make_grid(TOTAL_ROWS, WIDTH)
 
@@ -15,8 +15,9 @@ class Agneepath:
         end = None
 
         run = True
-        while run:
+        while run:    
             draw(self.win, grid, TOTAL_ROWS, WIDTH)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
@@ -28,7 +29,7 @@ class Agneepath:
                     if not start and spot != end:
                         start = spot
                         start.make_start()
-
+                        
                     elif not end and spot != start:
                         end = spot
                         end.make_end()
@@ -47,6 +48,8 @@ class Agneepath:
                         end = None
 
                 if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        run = False
                     if event.key == pygame.K_SPACE and start and end:
                         for row in grid:
                             for spot in row:
@@ -61,6 +64,7 @@ class Agneepath:
                             draw(self.win, grid, TOTAL_ROWS, WIDTH)
                             
                         if start is end:
+                            start.make_end()
                             print("Reached destination")
                         
                     if event.key == pygame.K_c:

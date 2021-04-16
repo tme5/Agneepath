@@ -10,7 +10,7 @@ class Spot:
         self.width = width
         self.x = row * self.width
         self.y = col * self.width
-        self.color = WHITE
+        self.color = TILE
         self.neighbors = []
         self.total_rows = total_rows
 
@@ -24,19 +24,19 @@ class Spot:
         return self.color == GREEN
 
     def is_barrier(self):
-        return self.color == BLACK
+        return self.color == ORANGE
 
     def is_start(self):
-        return self.color == ORANGE
+        return self.color == GREY
 
     def is_end(self):
         return self.color == TURQUOISE
 
     def reset(self):
-        self.color = WHITE
+        self.color = TILE
 
     def make_start(self):
-        self.color = ORANGE
+        self.color = GREY
 
     def make_closed(self):
         self.color = RED
@@ -45,7 +45,7 @@ class Spot:
         self.color = GREEN
 
     def make_barrier(self):
-        self.color = BLACK
+        self.color = ORANGE
 
     def make_end(self):
         self.color = TURQUOISE
