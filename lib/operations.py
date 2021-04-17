@@ -4,9 +4,9 @@ import os
 import time 
 
 cwd = os.getcwd()
-man = pygame.image.load(os.path.join(cwd, 'lib\\images\\man.jpg'))
-fire = pygame.image.load(os.path.join(cwd, 'lib\\images\\fire.jpg'))
-door = pygame.image.load(os.path.join(cwd, 'lib\\images\\door.jpg'))
+man = pygame.image.load(os.path.join(cwd, 'lib\\images\\man.png'))
+fire = pygame.image.load(os.path.join(cwd, 'lib\\images\\fire.png'))
+door = pygame.image.load(os.path.join(cwd, 'lib\\images\\door.png'))
 
 def heuristic(p1, p2):
     x1, y1 = p1
@@ -54,7 +54,7 @@ def algorithm(draw, grid, start, end):
 def reconstruct_path(came_from, current, draw):
     while current in came_from:
         current = came_from[current]
-        if not current.is_end():
+        if not current.is_end:
             current.make_path()
         draw()
 
@@ -108,12 +108,18 @@ def draw(win, grid, rows, width):
     for row in grid:
         for spot in row:
             spot.draw(win)
-            if spot.is_start():
-                win.blit(man.convert(), (spot.x, spot.y))
-            if spot.is_barrier():
-                win.blit(fire.convert(), (spot.x, spot.y))
-            if spot.is_end():
-                win.blit(door.convert(), (spot.x, spot.y))
+            if spot.is_start:
+                man.convert_alpha()
+                man.set_colorkey(WHITE)
+                win.blit(man, (spot.x, spot.y))
+            if spot.is_barrier:
+                fire.convert_alpha()
+                fire.set_colorkey(WHITE)
+                win.blit(fire, (spot.x, spot.y))
+            if spot.is_end:
+                door.convert_alpha()
+                door.set_colorkey(WHITE)
+                win.blit(door, (spot.x, spot.y))
     draw_grid(win, rows, width)
     pygame.display.update()
 
