@@ -18,6 +18,7 @@ TOTAL_ROWS = 20
 COUNT = 100
 # Images
 BG_IMAGE = 'lib\\images\\main_menu_bg.jpg'
+LOGO = 'lib\\images\\dragon.png'
 MAN_IMG = 'lib\\images\\man.png'
 FIRE_IMG = 'lib\\images\\fire.png'
 DOOR_IMG = 'lib\\images\\door.png'

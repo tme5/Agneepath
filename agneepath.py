@@ -26,12 +26,16 @@ class Agneepath:
         font2 = pygame.font.Font(FONT2, 40)
 
         bg = pygame.image.load(BG_IMAGE)
+        logo = pygame.image.load(LOGO)
         while True:
             self.win.fill((0,0,0))
             self.win.blit(bg, (0,0))
-            self.draw_text('AGNEEPATH', title, BUTTON, self.win, 10, 10)
-            self.draw_text('MAIN MENU', font1, (255, 255, 255), self.win, 20, 90)
-
+            self.draw_text('AGNEEPATH', title, BUTTON, self.win, 80, 10)
+            self.draw_text('MAIN MENU', font1, (255, 201, 14), self.win, 200, 150)
+            
+            logo.convert_alpha()
+            logo.set_colorkey(WHITE)
+            self.win.blit(logo, (10, 10))
             mx, my = pygame.mouse.get_pos()
     
             button_1 = pygame.Rect(200, 200, 220, 50)
@@ -80,11 +84,11 @@ class Agneepath:
             pygame.draw.rect(self.win, BUTTON, button_5, 0, 30)
             pygame.draw.rect(self.win, BUTTON_BORDER, button_5, 5, 30)
 
-            self.draw_text('STATIC MAZE', font2, (255, 255, 255), self.win, 235, 207)
-            self.draw_text('DYNAMIC MAZE', font2, (255, 255, 255), self.win, 230, 267)
-            self.draw_text('MOVING MAZE', font2, (255, 255, 255), self.win, 230, 327)
-            self.draw_text('CUSTOM MAZE', font2, (255, 255, 255), self.win, 230, 387)
-            self.draw_text('QUIT', font2, (255, 255, 255), self.win, 285, 447)
+            self.draw_text('STATIC MAZE', font2, YELLOW, self.win, 235, 207)
+            self.draw_text('DYNAMIC MAZE', font2, YELLOW, self.win, 230, 267)
+            self.draw_text('MOVING MAZE', font2, YELLOW, self.win, 230, 327)
+            self.draw_text('CUSTOM MAZE', font2, YELLOW, self.win, 230, 387)
+            self.draw_text('QUIT', font2, YELLOW, self.win, 285, 447)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
