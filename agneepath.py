@@ -18,6 +18,7 @@ class Agneepath:
         surface.blit(textobj, textrect)
         
     def main(self):
+        click = False
         mainClock = pygame.time.Clock()
         title = pygame.font.Font(TITLE, 80)
         font1 = pygame.font.Font(FONT1, 30)
@@ -38,9 +39,25 @@ class Agneepath:
             button_4 = pygame.Rect(200, 380, 220, 50)
             button_5 = pygame.Rect(235, 440, 150, 50)
 
+            if button_1.collidepoint((mx, my)):
+                if click:
+                    self.static_maze()
+                    click = False
+            
+            if button_2.collidepoint((mx, my)):
+                if click:
+                    self.dynamic_maze()
+                    click = False
+            
+            if button_3.collidepoint((mx, my)):
+                if click:
+                    self.moving_maze()
+                    click = False
+            
             if button_4.collidepoint((mx, my)):
                 if click:
-                    self.custom_game()
+                    self.custom_maze()
+                    click = False
             
             if button_5.collidepoint((mx, my)):
                 if click:
@@ -68,7 +85,6 @@ class Agneepath:
             self.draw_text('CUSTOM MAZE', font2, (255, 255, 255), self.win, 230, 387)
             self.draw_text('QUIT', font2, (255, 255, 255), self.win, 285, 447)
 
-            click = False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -84,14 +100,78 @@ class Agneepath:
             pygame.display.update()
             mainClock.tick(10)
 
-    def custom_game(self):        
+    def static_maze(self):
+        grid = make_grid(TOTAL_ROWS, WIDTH)
+        with open(MAZE_CONF, 'r') as f:
+            f_rd = f.readlines()
+        i = 0
+        for ln in f_rd:
+            j = 0
+            for conf in ln.split(','):
+                if int(conf):
+                    grid[j][i].make_barrier()
+                j += 1
+            i += 1
+        
+        grid[1][0].make_start()
+        grid[19][18].make_end()
+
+        start = grid[1][0]
+        end = grid[19][18]
+        astar_path = False
+        find_path = False
+        run = True
+        count = COUNT
+        delay = False
+        while run:
+            draw(self.win, grid, TOTAL_ROWS, WIDTH)
+            if count > 0:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
+                        return
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            run = False
+                            return
+                        if event.key == pygame.K_SPACE and start and end:
+                            find_path = True
+                            count = 0
+                if delay:
+                    count -=1
+            else:
+                if find_path:
+                    for row in grid:
+                        for spot in row:
+                            spot.update_neighbors(grid)
+                    astar_path = algorithm(lambda: draw(self.win, grid, TOTAL_ROWS, WIDTH), grid, end, start)
+                    find_path = False
+                if astar_path:
+                    if len([spot for spot in astar_path if spot.is_barrier]) > 0:
+                        for spot in astar_path:
+                            if not spot.is_barrier:
+                                spot.reset()
+                        find_path = True
+                    if not find_path:
+                        if start in astar_path:
+                            start.reset()
+                            start = astar_path.pop(start)
+                            start.make_start()
+                            delay = True
+                            count = COUNT
+                        if start is end:
+                            end.make_end()
+                            delay = False
+                            count = COUNT
+
+    def custom_maze(self):
         grid = make_grid(TOTAL_ROWS, WIDTH)
         start = None
         end = None
         astar_path = False
         find_path = False
         run = True
-        count = 500
+        count = COUNT
         delay = False
         while run:
             draw(self.win, grid, TOTAL_ROWS, WIDTH)          
@@ -157,11 +237,11 @@ class Agneepath:
                             start = astar_path.pop(start)
                             start.make_start()
                             delay = True
-                            count = 500
+                            count = COUNT
                         if start is end:
                             end.make_end()
                             delay = False
-                            count = 500
+                            count = COUNT
                     
 if __name__ == '__main__':
     test_obj = Agneepath()

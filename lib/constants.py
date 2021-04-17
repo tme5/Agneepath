@@ -15,7 +15,7 @@ BUTTON = (157, 103, 223)
 # Window configuration
 WIDTH = 600
 TOTAL_ROWS = 20
-
+COUNT = 100
 # Images
 BG_IMAGE = 'lib\\images\\main_menu_bg.jpg'
 MAN_IMG = 'lib\\images\\man.png'
@@ -28,3 +28,6 @@ PATH_IMG = 'lib\\images\\path.png'
 FONT1 = 'lib\\fonts\\PLANK___.TTF'
 FONT2 = 'lib\\fonts\\Long_Shot.ttf'
 TITLE = 'lib\\fonts\\DIMITRI_.TTF'
+
+# Maze
+MAZE_CONF = 'lib\\maze.conf'
