@@ -4,9 +4,11 @@ import os
 import time 
 
 cwd = os.getcwd()
-man = pygame.image.load(os.path.join(cwd, 'lib\\images\\man.png'))
-fire = pygame.image.load(os.path.join(cwd, 'lib\\images\\fire.png'))
-door = pygame.image.load(os.path.join(cwd, 'lib\\images\\door.png'))
+man = pygame.image.load(os.path.join(cwd, MAN_IMG))
+fire = pygame.image.load(os.path.join(cwd, FIRE_IMG))
+door = pygame.image.load(os.path.join(cwd, DOOR_IMG))
+tile = pygame.image.load(os.path.join(cwd, TILE_IMG))
+path = pygame.image.load(os.path.join(cwd, PATH_IMG))
 
 def heuristic(p1, p2):
     x1, y1 = p1
@@ -68,41 +70,6 @@ def make_grid(rows, width):
             grid[i].append(spot)
     return grid
 
-def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=3):
-    x1, y1 = start_pos
-    x2, y2 = end_pos
-    dl = dash_length
-
-    if (x1 == x2):
-        ycoords = [y for y in range(y1, y2, dl if y1 < y2 else -dl)]
-        xcoords = [x1] * len(ycoords)
-    elif (y1 == y2):
-        xcoords = [x for x in range(x1, x2, dl if x1 < x2 else -dl)]
-        ycoords = [y1] * len(xcoords)
-    else:
-        a = abs(x2 - x1)
-        b = abs(y2 - y1)
-        c = round(math.sqrt(a**2 + b**2))
-        dx = dl * a / c
-        dy = dl * b / c
-
-        xcoords = [x for x in numpy.arange(x1, x2, dx if x1 < x2 else -dx)]
-        ycoords = [y for y in numpy.arange(y1, y2, dy if y1 < y2 else -dy)]
-
-    next_coords = list(zip(xcoords[1::2], ycoords[1::2]))
-    last_coords = list(zip(xcoords[0::2], ycoords[0::2]))
-    for (x1, y1), (x2, y2) in zip(next_coords, last_coords):
-        start = (round(x1), round(y1))
-        end = (round(x2), round(y2))
-        pygame.draw.line(surf, color, start, end, width)
-
-def draw_grid(win, rows, width):
-    gap = width // rows
-    for i in range(rows):
-        draw_dashed_line(win, BLACK, (0, i * gap), (width, i * gap))
-        for j in range(rows):
-            draw_dashed_line(win, BLACK, (j * gap, 0), (j * gap, width))
-
 def draw(win, grid, rows, width):        
     win.fill(GREEN)
     for row in grid:
@@ -112,15 +79,18 @@ def draw(win, grid, rows, width):
                 man.convert_alpha()
                 man.set_colorkey(WHITE)
                 win.blit(man, (spot.x, spot.y))
-            if spot.is_barrier:
+            elif spot.is_barrier:
                 fire.convert_alpha()
                 fire.set_colorkey(WHITE)
                 win.blit(fire, (spot.x, spot.y))
-            if spot.is_end:
+            elif spot.is_end:
                 door.convert_alpha()
                 door.set_colorkey(WHITE)
                 win.blit(door, (spot.x, spot.y))
-    draw_grid(win, rows, width)
+            elif spot.is_path:
+                win.blit(path, (spot.x, spot.y))
+            else:
+                win.blit(tile, (spot.x, spot.y))
     pygame.display.update()
 
 def get_clicked_pos(pos, rows, width):

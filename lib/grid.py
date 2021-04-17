@@ -16,6 +16,7 @@ class Spot:
         self.is_start = False
         self.is_end = False
         self.is_barrier = False
+        self.is_path = False
 
     def get_pos(self):
         return self.row, self.col
@@ -24,9 +25,13 @@ class Spot:
         self.is_start = False
         self.is_end = False
         self.is_barrier = False
+        self.is_path = False
         self.color = TILE
 
     def make_start(self):
+        self.is_path = False
+        self.is_barrier = False
+        self.is_end = False
         self.is_start = True
 
     def make_closed(self):
@@ -36,13 +41,17 @@ class Spot:
         self.color = GREEN
 
     def make_barrier(self):
+        self.is_path = False
         self.is_barrier = True
-
+        
     def make_end(self):
+        self.is_path = False
+        self.is_barrier = False
+        self.is_start = False
         self.is_end = True
 
     def make_path(self):
-        self.color = PURPLE
+        self.is_path = True
 
     def draw(self, win):
         pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
