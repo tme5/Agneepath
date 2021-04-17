@@ -1,4 +1,5 @@
 import time
+import datetime
 import os
 import sys
 from lib.grid import Spot
@@ -130,7 +131,7 @@ class Agneepath:
                     if event.type == pygame.QUIT:
                         run = False
                         return
-                        
+
                     if pygame.mouse.get_pressed()[0]: # LEFT
                         pos = pygame.mouse.get_pos()
                         row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
@@ -213,6 +214,9 @@ class Agneepath:
         run = True
         count = COUNT
         delay = False
+        delta = 1
+        auto_add = False
+        dyn_bar_pos = DYN_BAR_POS
         while run:
             draw(self.win, grid, TOTAL_ROWS, WIDTH)
             if count > 0:
@@ -226,10 +230,17 @@ class Agneepath:
                             return
                         if event.key == pygame.K_SPACE and start and end:
                             find_path = True
+                            dyn_time = datetime.datetime.now() + datetime.timedelta(seconds = delta)
+                            auto_add = True
                             count = 0
                 if delay:
                     count -=1
             else:
+                if len(dyn_bar_pos) > 0 and auto_add:
+                    if dyn_time <= datetime.datetime.now():
+                        dyn_time = datetime.datetime.now() + datetime.timedelta(seconds = delta)
+                        pos = dyn_bar_pos.pop(0)
+                        grid[pos[0]][pos[1]].make_barrier()
                 if find_path:
                     for row in grid:
                         for spot in row:
