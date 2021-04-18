@@ -12,6 +12,10 @@ class Agneepath:
         pygame.init()
         self.win = pygame.display.set_mode((WIDTH, WIDTH))
         pygame.display.set_caption("Agneepath Incremental Pathfinding Algorithm")
+        self.title = pygame.font.Font(TITLE, 80)
+        self.font1 = pygame.font.Font(FONT1, 30)
+        self.font2 = pygame.font.Font(FONT2, 40)
+        self.font3 = pygame.font.Font(FONT2, 30)
     
     def draw_text(self, text, font, color, surface, x, y):
         textobj = font.render(text, 1, color)
@@ -22,17 +26,14 @@ class Agneepath:
     def main(self):
         click = False
         mainClock = pygame.time.Clock()
-        title = pygame.font.Font(TITLE, 80)
-        font1 = pygame.font.Font(FONT1, 30)
-        font2 = pygame.font.Font(FONT2, 40)
-
+        
         bg = pygame.image.load(BG_IMAGE)
         logo = pygame.image.load(LOGO)
         while True:
             self.win.fill((0,0,0))
             self.win.blit(bg, (0,0))
-            self.draw_text('AGNEEPATH', title, BUTTON, self.win, 80, 10)
-            self.draw_text('MAIN MENU', font1, (255, 201, 14), self.win, 200, 150)
+            self.draw_text('AGNEEPATH', self.title, BUTTON, self.win, 80, 10)
+            self.draw_text('MAIN MENU', self.font1, YELLOW, self.win, 200, 150)
             
             logo.convert_alpha()
             logo.set_colorkey(WHITE)
@@ -85,11 +86,11 @@ class Agneepath:
             pygame.draw.rect(self.win, BUTTON, button_5, 0, 30)
             pygame.draw.rect(self.win, BUTTON_BORDER, button_5, 5, 30)
 
-            self.draw_text('PLAY GAME', font2, YELLOW, self.win, 245, 207)
-            self.draw_text('STATIC MAZE', font2, YELLOW, self.win, 235, 267)
-            self.draw_text('DYNAMIC MAZE', font2, YELLOW, self.win, 230, 327)
-            self.draw_text('CUSTOM MAZE', font2, YELLOW, self.win, 230, 387)
-            self.draw_text('QUIT', font2, YELLOW, self.win, 285, 447)
+            self.draw_text('PLAY GAME', self.font2, YELLOW, self.win, 245, 207)
+            self.draw_text('STATIC MAZE', self.font2, YELLOW, self.win, 235, 267)
+            self.draw_text('DYNAMIC MAZE', self.font2, YELLOW, self.win, 230, 327)
+            self.draw_text('CUSTOM MAZE', self.font2, YELLOW, self.win, 230, 387)
+            self.draw_text('QUIT', self.font2, YELLOW, self.win, 285, 447)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -119,13 +120,12 @@ class Agneepath:
                 j += 1
             i += 1
         
-        grid[1][0].make_start()
-        grid[19][18].make_end()
-        grid[19][5].make_dragon()
-
         start = grid[1][0]
+        start.make_start()
         end = grid[19][18]
-        dragon = grid[19][5]
+        end.make_end()
+        dragon = grid[10][9]
+        dragon.make_dragon()
         astar_path = False
         find_path = False
         run = True
@@ -138,7 +138,6 @@ class Agneepath:
                     if event.type == pygame.QUIT:
                         run = False
                         return
-
                     if event.type == pygame.KEYDOWN:
                         if event.key==pygame.K_LEFT:
                             if not grid[dragon.row - 1][dragon.col].is_wall and not grid[dragon.row - 1][dragon.col].is_end:
@@ -176,6 +175,21 @@ class Agneepath:
                             count = 0
                 if delay:
                     count -=1
+            elif start == dragon:
+                delay = False
+                for spot in astar_path:
+                    if not spot.is_dragon:
+                        spot.reset()
+                find_path = False
+                count = COUNT
+                pygame.draw.rect(self.win, BUTTON, pygame.Rect(170, 215, 230, 80), 0, 30)
+                pygame.draw.rect(self.win, BUTTON_BORDER, pygame.Rect(170, 215, 230, 80), 5, 30)
+                self.draw_text('YOU ARE CAUGHT!!!', self.font3, BLACK, self.win, 205, 225)
+                self.draw_text('GOING TO MAIN MENU.', self.font3, BLACK, self.win, 200, 255)
+                pygame.display.update()
+                time.sleep(5)
+                run = False
+                return
             else:
                 if find_path:
                     for row in grid:
@@ -271,6 +285,15 @@ class Agneepath:
                             count = 0
                 if delay:
                     count -=1
+            elif not find_path and not astar_path:
+                pygame.draw.rect(self.win, BUTTON, pygame.Rect(170, 215, 230, 80), 0, 30)
+                pygame.draw.rect(self.win, BUTTON_BORDER, pygame.Rect(170, 215, 230, 80), 5, 30)
+                self.draw_text('CANNOT FIND PATH', self.font3, BLACK, self.win, 205, 225)
+                self.draw_text('GOING TO MAIN MENU.', self.font3, BLACK, self.win, 200, 255)
+                pygame.display.update()
+                time.sleep(5)
+                run = False
+                return
             else:
                 if find_path:
                     for row in grid:
