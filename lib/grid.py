@@ -17,11 +17,14 @@ class Spot:
         self.is_end = False
         self.is_barrier = False
         self.is_path = False
+        self.is_dragon = False
+        self.is_wall = False
 
     def get_pos(self):
         return self.row, self.col
 
     def reset(self):
+        self.is_dragon = False
         self.is_start = False
         self.is_end = False
         self.is_barrier = False
@@ -29,26 +32,35 @@ class Spot:
         self.color = TILE
 
     def make_start(self):
+        self.is_dragon = False
         self.is_path = False
         self.is_barrier = False
         self.is_end = False
         self.is_start = True
 
-    def make_closed(self):
-        self.color = RED
-
-    def make_open(self):
-        self.color = GREEN
-
     def make_barrier(self):
+        self.is_dragon = False
         self.is_path = False
         self.is_barrier = True
+
+    def make_wall(self):
+        self.is_dragon = False
+        self.is_path = False
+        self.is_barrier = False
+        self.is_wall = True
         
     def make_end(self):
+        self.is_dragon = False
         self.is_path = False
         self.is_barrier = False
         self.is_start = False
         self.is_end = True
+
+    def make_dragon(self):
+        self.is_path = False
+        self.is_barrier = False
+        self.is_start = False
+        self.is_dragon = True
 
     def make_path(self):
         self.is_path = True
@@ -58,16 +70,16 @@ class Spot:
 
     def update_neighbors(self, grid):
         self.neighbors = []
-        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier: # DOWN
+        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier and not grid[self.row + 1][self.col].is_wall and not grid[self.row + 1][self.col].is_dragon : # DOWN
             self.neighbors.append(grid[self.row + 1][self.col])
 
-        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier: # UP
+        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier and not grid[self.row - 1][self.col].is_wall and not grid[self.row - 1][self.col].is_dragon: # UP
             self.neighbors.append(grid[self.row - 1][self.col])
 
-        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier: # RIGHT
+        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier and not grid[self.row][self.col + 1].is_wall and not grid[self.row][self.col + 1].is_dragon: # RIGHT
             self.neighbors.append(grid[self.row][self.col + 1])
 
-        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier: # LEFT
+        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier and not grid[self.row][self.col - 1].is_wall and not grid[self.row][self.col - 1].is_dragon: # LEFT
             self.neighbors.append(grid[self.row][self.col - 1])
 
     def __lt__(self, other):

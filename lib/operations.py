@@ -9,6 +9,8 @@ fire = pygame.image.load(os.path.join(cwd, FIRE_IMG))
 door = pygame.image.load(os.path.join(cwd, DOOR_IMG))
 tile = pygame.image.load(os.path.join(cwd, TILE_IMG))
 path = pygame.image.load(os.path.join(cwd, PATH_IMG))
+dragon = pygame.image.load(os.path.join(cwd, DRAGON_IMG))
+wall = pygame.image.load(os.path.join(cwd, WALL_IMG))
 
 def heuristic(p1, p2):
     x1, y1 = p1
@@ -76,19 +78,17 @@ def draw(win, grid, rows, width):
         for spot in row:
             spot.draw(win)
             if spot.is_start:
-                man.convert_alpha()
-                man.set_colorkey(WHITE)
                 win.blit(man, (spot.x, spot.y))
             elif spot.is_barrier:
-                fire.convert_alpha()
-                fire.set_colorkey(WHITE)
                 win.blit(fire, (spot.x, spot.y))
             elif spot.is_end:
-                door.convert_alpha()
-                door.set_colorkey(WHITE)
                 win.blit(door, (spot.x, spot.y))
             elif spot.is_path:
                 win.blit(path, (spot.x, spot.y))
+            elif spot.is_dragon:
+                win.blit(dragon, (spot.x, spot.y))
+            elif spot.is_wall:
+                win.blit(wall, (spot.x, spot.y))
             else:
                 win.blit(tile, (spot.x, spot.y))
     pygame.display.update()
@@ -101,3 +101,10 @@ def get_clicked_pos(pos, rows, width):
     col = x // gap
 
     return row, col
+
+def get_barrier_count(grid):
+    barrier_count = 0
+    for row in grid:
+        temp_count = len([spot for spot in row if spot.is_barrier])
+        barrier_count += temp_count
+    return barrier_count

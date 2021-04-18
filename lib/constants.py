@@ -18,12 +18,14 @@ TOTAL_ROWS = 20
 COUNT = 100
 # Images
 BG_IMAGE = 'lib\\images\\main_menu_bg.jpg'
-LOGO = 'lib\\images\\dragon.png'
+LOGO = 'lib\\images\\dragon_logo.png'
 MAN_IMG = 'lib\\images\\man.png'
 FIRE_IMG = 'lib\\images\\fire.png'
 DOOR_IMG = 'lib\\images\\door.png'
 TILE_IMG = 'lib\\images\\tile.png'
 PATH_IMG = 'lib\\images\\path.png'
+DRAGON_IMG = 'lib\\images\\dragon.png'
+WALL_IMG = 'lib\\images\\wall.png'
 
 # Fonts
 FONT1 = 'lib\\fonts\\PLANK___.TTF'
@@ -32,4 +34,4 @@ TITLE = 'lib\\fonts\\DIMITRI_.TTF'
 
 # Maze
 MAZE_CONF = 'lib\\maze.conf'
-DYN_BAR_POS = [(3,5), (5,4), (9,4), (11,4), (13,6), (15,4), (17,4), (12,9), (12,7), (9,10), (9,11), (5,14), (4,17), (5,17), (5,18), (12,17)]
+DYN_BAR_POS = [(3,5), (5,4), (9,4), (11,4), (13,6), (17,5), (17,4), (12,9), (12,7), (9,11), (9,10), (5,17), (4,17), (5,18), (12,17)]
