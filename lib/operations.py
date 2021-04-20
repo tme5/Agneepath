@@ -41,6 +41,7 @@ def algorithm(draw, grid, start, end):
             reconstruct_path(came_from, end, draw)
             end.make_end()
             return came_from
+        #print(current.neighbors)
 
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
@@ -53,6 +54,8 @@ def algorithm(draw, grid, start, end):
                     count += 1
                     open_set.put((f_score[neighbor], count, neighbor))
                     open_set_hash.add(neighbor)
+        #print("Current:", current.row, current.col)
+        #print("End:", end.row, end.col)
     return False
 
 def reconstruct_path(came_from, current, draw):
