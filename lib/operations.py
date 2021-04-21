@@ -72,8 +72,7 @@ def make_grid(rows, width):
             grid[i].append(spot)
     return grid
 
-def draw(win, grid, rows, width):        
-    win.fill(GREEN)
+def draw(win, grid, rows, width):
     for row in grid:
         for spot in row:
             spot.draw(win)
