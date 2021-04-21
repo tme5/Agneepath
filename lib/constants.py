@@ -24,12 +24,14 @@ FIRE_IMG = 'lib\\images\\fire.png'
 DOOR_IMG = 'lib\\images\\door.png'
 TILE_IMG = 'lib\\images\\tile.png'
 PATH_IMG = 'lib\\images\\path.png'
+INTER_IMG = 'lib\\images\\intersection.png'
 DRAGON_IMG = 'lib\\images\\dragon.png'
 WALL_IMG = 'lib\\images\\wall.png'
 
 # Fonts
 FONT1 = 'lib\\fonts\\PLANK___.TTF'
 FONT2 = 'lib\\fonts\\Long_Shot.ttf'
+FONT3 = 'lib\\fonts\\BebasNeue-Regular.ttf'
 TITLE = 'lib\\fonts\\DIMITRI_.TTF'
 
 # Maze

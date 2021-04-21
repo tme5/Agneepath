@@ -19,6 +19,7 @@ class Agneepath:
         self.font1 = pygame.font.Font(FONT1, 30)
         self.font2 = pygame.font.Font(FONT2, 40)
         self.font3 = pygame.font.Font(FONT2, 30)
+        self.font4 = pygame.font.Font(FONT3, 30)
     
     def draw_text(self, text, font, color, surface, x, y):
         textobj = font.render(text, 1, color)
@@ -41,14 +42,12 @@ class Agneepath:
             self.win.blit(bg, (0,0))
             self.draw_text('AGNEEPATH', self.title, BUTTON, self.win, 80, 10)
             self.draw_text('MAIN MENU', self.font1, YELLOW, self.win, 200, 150)
-            self.draw_text('Enter count', self.font3, YELLOW, self.win, 350, 100)
+            self.draw_text('Enter start count', self.font4, YELLOW, self.win, 300, 90)
 
-            logo.convert_alpha()
-            logo.set_colorkey(WHITE)
             self.win.blit(logo, (10, 10))
             mx, my = pygame.mouse.get_pos()
 
-            textbox = pygame.Rect(500, 100, 50, 30)
+            textbox = pygame.Rect(500, 90, 50, 30)
             button_1 = pygame.Rect(200, 200, 220, 50)
             button_2 = pygame.Rect(200, 260, 220, 50)
             button_3 = pygame.Rect(200, 320, 220, 50)
@@ -121,6 +120,7 @@ class Agneepath:
                     if active:
                         if event.key == pygame.K_RETURN:
                             self.start_count = int(user_input)
+                            active = False
                         elif event.key == pygame.K_BACKSPACE:
                             user_input = user_input[:-1]
                         else:
@@ -129,7 +129,7 @@ class Agneepath:
                     if event.button == 1:
                         click = True
 
-            self.draw_text(user_input, self.font3, YELLOW, self.win, 510, 100)
+            self.draw_text(user_input, self.font3, YELLOW, self.win, 510, 90)
             pygame.display.update()
             mainClock.tick(10)
 
@@ -433,7 +433,6 @@ class Agneepath:
         delay = False
         run = True
         while run:
-            print("LOOP : ", datetime.now())
             draw(self.win, grid, TOTAL_ROWS, WIDTH)
             if count > 0:
                 for event in pygame.event.get():
@@ -465,23 +464,31 @@ class Agneepath:
                         for spot in row:
                             spot.update_neighbors(grid, start)
                     astar_path = algorithm(lambda: draw(self.win, grid, TOTAL_ROWS, WIDTH), grid, end, start)
-                    print("LOOP1 : ", datetime.now())
-                    print(find_path, astar_path)
                     find_path = False
                 if astar_path:
-                    if len([spot for spot in astar_path if spot.is_barrier]) > 0 or len([spot for spot in astar_path if spot.is_start]) > 0 or len([spot for spot in astar_path if spot.is_wall]) > 0 or len([spot for spot in astar_path if spot.is_dragon]) > 0:
+                    _barriers = len([spot for spot in astar_path if spot.is_barrier])
+                    _walls = len([spot for spot in astar_path if spot.is_wall])
+                    _dragons = len([spot for spot in astar_path if spot.is_dragon])
+                    if _barriers > 0 or _walls > 0 or _dragons > 0:
                         for spot in astar_path:
-                            if not spot.is_barrier and not spot.is_start and not spot.is_wall and not spot.is_dragon:
-                                print("Spot co-ord:", spot.row, spot.col)
+                            if not spot.is_barrier and not spot.is_wall and not spot.is_dragon:
                                 spot.reset()
+                            if spot.is_intersection:
+                                spot.make_path()
                         find_paths = True
                     if not find_path:
                         if start in astar_path:
-                            start.reset()
+                            if start.is_intersection:
+                                start.reset()
+                                start.make_path()
+                            else:
+                                start.reset()
                             start = astar_path.pop(start)
+                            start.make_start()
                             delay = True
                             count = COUNT
                         if start is end:
+                            end.is_start = False
                             end.make_end()
                             run = False
                 if not astar_path and not find_path:
@@ -493,6 +500,7 @@ class Agneepath:
         end = None
         run = True
         solve_flag = True
+        self.astar_paths = {}
         while run:
             draw(self.win, grid, TOTAL_ROWS, WIDTH)
             for event in pygame.event.get():
@@ -504,7 +512,6 @@ class Agneepath:
                     row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
                     spot = grid[row][col]
                     if len(start_list) != int(self.start_count) and spot != end:
-                        print(len(start_list), int(self.start_count))
                         spot.make_start()
                         start_list.append(spot)
                         
@@ -544,6 +551,7 @@ class Agneepath:
                 threads.append(t)
             for t in threads:
                 t.join()
+        
                     
 if __name__ == '__main__':
     test_obj = Agneepath()

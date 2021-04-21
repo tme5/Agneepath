@@ -11,6 +11,7 @@ tile = pygame.image.load(os.path.join(cwd, TILE_IMG))
 path = pygame.image.load(os.path.join(cwd, PATH_IMG))
 dragon = pygame.image.load(os.path.join(cwd, DRAGON_IMG))
 wall = pygame.image.load(os.path.join(cwd, WALL_IMG))
+intr_section = pygame.image.load(os.path.join(cwd, INTER_IMG))
 
 def heuristic(p1, p2):
     x1, y1 = p1
@@ -41,8 +42,6 @@ def algorithm(draw, grid, start, end):
             reconstruct_path(came_from, end, draw)
             end.make_end()
             return came_from
-        #print(current.neighbors)
-
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
 
@@ -54,8 +53,6 @@ def algorithm(draw, grid, start, end):
                     count += 1
                     open_set.put((f_score[neighbor], count, neighbor))
                     open_set_hash.add(neighbor)
-        #print("Current:", current.row, current.col)
-        #print("End:", end.row, end.col)
     return False
 
 def reconstruct_path(came_from, current, draw):
@@ -80,18 +77,20 @@ def draw(win, grid, rows, width):
     for row in grid:
         for spot in row:
             spot.draw(win)
-            if spot.is_start:
-                win.blit(man, (spot.x, spot.y))
+            if spot.is_path:
+                win.blit(path, (spot.x, spot.y))
             elif spot.is_barrier:
                 win.blit(fire, (spot.x, spot.y))
             elif spot.is_end:
                 win.blit(door, (spot.x, spot.y))
-            elif spot.is_path:
-                win.blit(path, (spot.x, spot.y))
+            elif spot.is_start:
+                win.blit(man, (spot.x, spot.y))
             elif spot.is_dragon:
                 win.blit(dragon, (spot.x, spot.y))
             elif spot.is_wall:
                 win.blit(wall, (spot.x, spot.y))
+            elif spot.is_intersection:
+                win.blit(intr_section, (spot.x, spot.y))
             else:
                 win.blit(tile, (spot.x, spot.y))
     pygame.display.update()
