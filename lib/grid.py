@@ -67,14 +67,15 @@ class Spot:
             self.is_intersection = True
             self.is_path = False
         elif self.is_intersection:
-            pass
+            self.is_intersection = False
+            self.is_path = True
         else:
             self.is_path = True
 
     def draw(self, win):
         pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
 
-    def update_neighbors(self, grid, start):
+    def update_neighbors(self, grid):
         self.neighbors = []
         if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier and not grid[self.row + 1][self.col].is_wall and not grid[self.row + 1][self.col].is_dragon: # DOWN
             self.neighbors.append(grid[self.row + 1][self.col])

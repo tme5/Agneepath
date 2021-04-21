@@ -10,6 +10,8 @@ from lib.grid import Spot
 from lib.operations import *
 from lib.constants import *
 
+THREAD_DRAW = False
+
 class Agneepath:
     def __init__(self):
         pygame.init()
@@ -426,12 +428,14 @@ class Agneepath:
                             delay = False
                             count = COUNT
 
-    def solve(self, grid, start, end):
+    def solve(self, name, grid, start, end):
+        global THREAD_DRAW
         astar_path = False
         find_path = True
         count = 0
         delay = False
         run = True
+        print("Thread %s starts:" %name, datetime.now())
         while run:
             draw(self.win, grid, TOTAL_ROWS, WIDTH)
             if count > 0:
@@ -458,11 +462,9 @@ class Agneepath:
                     count -=1
             else:
                 if find_path:
-                    print("Start co-ord:", start.row, start.col)
-                    print("End co-ord:", end.row, end.col)
                     for row in grid:
                         for spot in row:
-                            spot.update_neighbors(grid, start)
+                            spot.update_neighbors(grid)
                     astar_path = algorithm(lambda: draw(self.win, grid, TOTAL_ROWS, WIDTH), grid, end, start)
                     find_path = False
                 if astar_path:
@@ -478,18 +480,20 @@ class Agneepath:
                         find_paths = True
                     if not find_path:
                         if start in astar_path:
-                            if start.is_intersection:
-                                start.reset()
-                                start.make_path()
-                            else:
-                                start.reset()
-                            start = astar_path.pop(start)
-                            start.make_start()
+                            if not astar_path[start].is_start:
+                                if start.is_intersection:
+                                    start.reset()
+                                    start.make_path()
+                                else:
+                                    start.reset()
+                                start = astar_path.pop(start)
+                                start.make_start()
                             delay = True
                             count = COUNT
                         if start is end:
                             end.is_start = False
                             end.make_end()
+                            print("Thread %s ends:" %name, datetime.now())
                             run = False
                 if not astar_path and not find_path:
                     raise Exception("Cannot find astar_path.")
@@ -545,14 +549,13 @@ class Agneepath:
         
         if solve_flag:
             threads = []
-            for start in start_list:
-                t = threading.Thread(target=self.solve, args=(grid, start, end))
+            for i, start in enumerate(start_list):
+                t = threading.Thread(target=self.solve, args=('man_%s' %i, grid, start, end))
                 t.start()
                 threads.append(t)
             for t in threads:
                 t.join()
-        
-                    
+                            
 if __name__ == '__main__':
     test_obj = Agneepath()
     test_obj.main()

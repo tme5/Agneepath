@@ -77,14 +77,14 @@ def draw(win, grid, rows, width):
     for row in grid:
         for spot in row:
             spot.draw(win)
-            if spot.is_path:
+            if spot.is_start:
+                win.blit(man, (spot.x, spot.y))
+            elif spot.is_path:
                 win.blit(path, (spot.x, spot.y))
             elif spot.is_barrier:
                 win.blit(fire, (spot.x, spot.y))
             elif spot.is_end:
                 win.blit(door, (spot.x, spot.y))
-            elif spot.is_start:
-                win.blit(man, (spot.x, spot.y))
             elif spot.is_dragon:
                 win.blit(dragon, (spot.x, spot.y))
             elif spot.is_wall:
