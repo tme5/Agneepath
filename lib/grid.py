@@ -29,6 +29,7 @@ class Spot:
         self.is_start = False
         self.is_end = False
         self.is_barrier = False
+        self.is_intersection = False
         self.is_path = False
         self.color = TILE
 

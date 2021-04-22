@@ -18,7 +18,7 @@ def heuristic(p1, p2):
     x2, y2 = p2
     return abs(x1 - x2) + abs(y1 - y2)
 
-def algorithm(draw, grid, start, end):
+def algorithm(grid, start, end):
     count = 0
     open_set = PriorityQueue()
     open_set.put((0, count, start))
@@ -39,9 +39,9 @@ def algorithm(draw, grid, start, end):
         open_set_hash.remove(current)
 
         if current == end:
-            reconstruct_path(came_from, end, draw)
+            path = reconstruct_path(came_from, end)
             end.make_end()
-            return came_from
+            return path
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
 
@@ -55,11 +55,17 @@ def algorithm(draw, grid, start, end):
                     open_set_hash.add(neighbor)
     return False
 
-def reconstruct_path(came_from, current, draw):
+def reconstruct_path(came_from, current):
+    path = []
     while current in came_from:
         current = came_from[current]
         if not current.is_end:
-            current.make_path()
+           path.append(current)
+    return path
+
+def color_path(path, draw):
+    for spot in path:
+        spot.make_path()
         draw()
 
 def make_grid(rows, width):

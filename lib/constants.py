@@ -15,7 +15,7 @@ BUTTON = (157, 103, 223)
 # Window configuration
 WIDTH = 600
 TOTAL_ROWS = 20
-COUNT = 100
+COUNT = 200
 # Images
 BG_IMAGE = 'lib\\images\\main_menu_bg.jpg'
 LOGO = 'lib\\images\\dragon_logo.png'
