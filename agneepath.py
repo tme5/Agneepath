@@ -310,7 +310,8 @@ class Agneepath:
                         run = False
                         return
                     if event.type == pygame.KEYDOWN:
-                        self.click_sound.play()
+                        if self.play_sound:
+                            self.click_sound.play()
                         if event.key==pygame.K_LEFT:
                             if not grid[dragon.row - 1][dragon.col].is_wall and not grid[dragon.row - 1][dragon.col].is_end:
                                 dragon.reset()
@@ -355,7 +356,8 @@ class Agneepath:
             else:
                 if dragon in self.start_list:
                     caught += 1
-                    self.eat_sound.play()
+                    if self.play_sound:
+                        self.eat_sound.play()
                     for i, start in enumerate(self.start_list):
                         if dragon == start and self.path_obj_dict and 'man_%s' %i in self.path_obj_dict:
                             for spot in self.path_obj_dict['man_%s' %i][2]:
@@ -401,6 +403,8 @@ class Agneepath:
                                     start.reset()
                                 start = _path_obj[2].pop(0)
                                 start.make_start()
+                                if self.play_sound:
+                                    self.footstep_sound.play()
                                 self.start_list[i] = start
                             delay = True
                             count = COUNT
@@ -450,6 +454,8 @@ class Agneepath:
                         run = False
 
                     if pygame.mouse.get_pressed()[0]: # LEFT
+                        if self.play_sound:
+                            self.click_sound.play()
                         pos = pygame.mouse.get_pos()
                         row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
                         spot = grid[row][col]
@@ -458,6 +464,8 @@ class Agneepath:
                             prev_barrier_count += 1
                             spot.make_barrier()
                     elif pygame.mouse.get_pressed()[2]: # RIGHT
+                        if self.play_sound:
+                            self.click_sound.play()
                         pos = pygame.mouse.get_pos()
                         row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
                         spot = grid[row][col]
@@ -465,6 +473,8 @@ class Agneepath:
                             barrier_count -= 1
                             spot.reset()
                     if event.type == pygame.KEYDOWN:
+                        if self.play_sound:
+                            self.click_sound.play()
                         if event.key == pygame.K_ESCAPE:
                             run = False
                             update_path = False
@@ -514,6 +524,8 @@ class Agneepath:
                                     start.reset()
                                 start = _path_obj[2].pop(0)
                                 start.make_start()
+                                if self.play_sound:
+                                    self.footstep_sound.play()
                                 self.start_list[i] = start
                             delay = True
                             count = COUNT            
@@ -624,6 +636,8 @@ class Agneepath:
                                     start.reset()
                                 start = _path_obj[2].pop(0)
                                 start.make_start()
+                                if self.play_sound:
+                                    self.footstep_sound.play()
                                 self.start_list[i] = start
                             delay = True
                             count = COUNT
@@ -661,7 +675,8 @@ class Agneepath:
                     if event.type == pygame.QUIT:
                         run = False
                     if pygame.mouse.get_pressed()[0]: # LEFT
-                        self.click_sound.play()
+                        if self.play_sound:
+                            self.click_sound.play()
                         pos = pygame.mouse.get_pos()
                         row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
                         spot = grid[row][col]
@@ -676,7 +691,8 @@ class Agneepath:
                             prev_barrier_count += 1
                             spot.make_barrier()
                     elif pygame.mouse.get_pressed()[2]: # RIGHT
-                        self.click_sound.play()
+                        if self.play_sound:
+                            self.click_sound.play()
                         pos = pygame.mouse.get_pos()
                         row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
                         spot = grid[row][col]
@@ -692,7 +708,8 @@ class Agneepath:
                             if spot not in self.start_list and spot not in self.end_list:
                                 spot.reset()
                     if event.type == pygame.KEYDOWN:
-                        self.click_sound.play()
+                        if self.play_sound:
+                            self.click_sound.play()
                         if event.key == pygame.K_ESCAPE:
                             run = False
                             update_path = False
@@ -746,7 +763,8 @@ class Agneepath:
                                     start.reset()
                                 start = _path_obj[2].pop(0)
                                 start.make_start()
-                                self.footstep_sound.play()
+                                if self.play_sound:
+                                    self.footstep_sound.play()
                                 self.start_list[i] = start
                             delay = True
                             count = COUNT
