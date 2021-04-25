@@ -15,10 +15,14 @@ BUTTON = (157, 103, 223)
 # Window configuration
 WIDTH = 600
 TOTAL_ROWS = 20
-COUNT = 100
+COUNT = 200
 # Images
 BG_IMAGE = 'lib\\images\\main_menu_bg.jpg'
 LOGO = 'lib\\images\\dragon_logo.png'
+SOUND_ICON = 'lib\\images\\sound.png'
+MUSIC_ICON = 'lib\\images\\music.png'
+NO_SOUND_ICON = 'lib\\images\\no_sound.png'
+NO_MUSIC_ICON = 'lib\\images\\no_music.png'
 MAN_IMG = 'lib\\images\\man.png'
 FIRE_IMG = 'lib\\images\\fire.png'
 DOOR_IMG = 'lib\\images\\door.png'
@@ -37,3 +41,9 @@ TITLE = 'lib\\fonts\\DIMITRI_.TTF'
 # Maze
 MAZE_CONF = 'lib\\maze.conf'
 DYN_BAR_POS = [(3,5), (5,4), (9,4), (11,4), (13,6), (17,5), (17,4), (12,9), (12,7), (9,11), (9,10), (5,17), (4,17), (5,18), (12,17)]
+
+# Sound and Music
+BG_MUSIC = 'lib\\sound\\bg_music_1.mp3'
+CLICK_SOUND = 'lib\\sound\\click.mp3'
+FOOTSTEP_SOUND = 'lib\\sound\\footstep.mp3'
+EAT_SOUND = 'lib\\sound\\eat.mp3'

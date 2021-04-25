@@ -35,12 +35,27 @@ class Agneepath:
         
         bg = pygame.image.load(BG_IMAGE)
         logo = pygame.image.load(LOGO)
+        self.sound_flag = True
+        self.music_flag = True
+        self.play = True
+        self.play_sound = True
+        sound_hover = False
+        music_hover = False
+        sound_icon = pygame.image.load(SOUND_ICON).convert()
+        music_icon = pygame.image.load(MUSIC_ICON).convert()
+        no_sound_icon = pygame.image.load(NO_SOUND_ICON).convert()
+        no_music_icon = pygame.image.load(NO_MUSIC_ICON).convert()
         textbox1_active = False
         textbox2_active = False
         user_input1 = '2'
         user_input2 = '3'
         self.start_count = int(user_input1)
         self.end_count = int(user_input2)
+        self.music = pygame.mixer.music.load(BG_MUSIC)
+        self.click_sound = pygame.mixer.Sound(CLICK_SOUND)
+        self.footstep_sound = pygame.mixer.Sound(FOOTSTEP_SOUND)
+        pygame.mixer.Sound.set_volume(self.footstep_sound, 0.2)
+        self.eat_sound = pygame.mixer.Sound(EAT_SOUND)
 
         while True:
             textbox1_border = BUTTON_BORDER
@@ -53,60 +68,123 @@ class Agneepath:
             self.win.fill((0,0,0))
             self.win.blit(bg, (0,0))
             self.draw_text('AGNEEPATH', self.title, BUTTON, self.win, 80, 10)
-            self.draw_text('MAIN MENU', self.font1, YELLOW, self.win, 200, 150)
+            self.draw_text('MAIN MENU', self.font1, YELLOW, self.win, 200, 170)
             self.draw_text('Enter start count', self.font4, YELLOW, self.win, 300, 90)
             self.draw_text('Enter end count', self.font4, YELLOW, self.win, 300, 130)
 
             self.win.blit(logo, (10, 10))
+            music_box = pygame.Rect(549, 499, 42, 42)
+            sound_box = pygame.Rect(549, 549, 42, 42)
+            if self.sound_flag:
+                sound_icon.set_colorkey(WHITE)
+                self.win.blit(sound_icon, (550, 550))
+                self.play_sound = True
+            else:
+                no_sound_icon.set_colorkey(WHITE)
+                self.win.blit(no_sound_icon, (550, 550))
+                self.play_sound = False
+            
+            if self.music_flag:
+                music_icon.set_colorkey(WHITE)
+                self.win.blit(music_icon, (550, 500))
+                if self.play:
+                    pygame.mixer.music.play()
+                    self.play = False
+            else:
+                no_music_icon.set_colorkey(WHITE)
+                self.win.blit(no_music_icon, (550, 500))
+                pygame.mixer.music.stop()
+                self.play = True
+            if sound_hover:
+                pygame.draw.rect(self.win, WHITE, sound_box, 3, 21)
+                sound_hover = False
+            else:
+                pygame.draw.rect(self.win, BUTTON_BORDER, sound_box, 3, 21)
+            if music_hover:
+                pygame.draw.rect(self.win, WHITE, music_box, 3, 21)
+                music_hover = False
+            else:
+                pygame.draw.rect(self.win, BUTTON_BORDER, music_box, 3, 21)
+            
             mx, my = pygame.mouse.get_pos()
 
             textbox1 = pygame.Rect(500, 90, 50, 30)
             textbox2 = pygame.Rect(500, 130, 50, 30)
-            button_1 = pygame.Rect(200, 200, 220, 50)
-            button_2 = pygame.Rect(200, 260, 220, 50)
-            button_3 = pygame.Rect(200, 320, 220, 50)
-            button_4 = pygame.Rect(200, 380, 220, 50)
-            button_5 = pygame.Rect(235, 440, 150, 50)
+            button_1 = pygame.Rect(200, 220, 220, 50)
+            button_2 = pygame.Rect(200, 280, 220, 50)
+            button_3 = pygame.Rect(200, 340, 220, 50)
+            button_4 = pygame.Rect(200, 400, 220, 50)
+            button_5 = pygame.Rect(235, 460, 150, 50)
+
+            if music_box.collidepoint((mx, my)):
+                music_hover = True
+                if click:
+                    if self.play_sound:
+                        self.click_sound.play()
+                    self.music_flag = not self.music_flag
+                    click = False
+            if sound_box.collidepoint((mx, my)):
+                sound_hover = True
+                audio_border = WHITE
+                if click:
+                    if self.play_sound:
+                        self.click_sound.play()
+                    self.sound_flag = not self.sound_flag
+                    click = False
 
             if textbox1.collidepoint((mx, my)):
                 textbox1_border = WHITE
                 if click:
+                    if self.play_sound:
+                        self.click_sound.play()
                     textbox1_active = not textbox1_active
                     click = False
 
             if textbox2.collidepoint((mx, my)):
                 textbox2_border = WHITE
                 if click:
+                    if self.play_sound:
+                        self.click_sound.play()
                     textbox2_active = not textbox2_active
                     click = False
 
             if button_1.collidepoint((mx, my)):
                 button1_border = WHITE
                 if click:
+                    if self.play_sound:
+                        self.click_sound.play()
                     self.play_game()
                     click = False
             
             if button_2.collidepoint((mx, my)):
                 button2_border = WHITE
                 if click:
+                    if self.play_sound:
+                        self.click_sound.play()
                     self.static_maze()
                     click = False
             
             if button_3.collidepoint((mx, my)):
                 button3_border = WHITE
                 if click:
+                    if self.play_sound:
+                        self.click_sound.play()
                     self.dynamic_maze()
                     click = False
             
             if button_4.collidepoint((mx, my)):
                 button4_border = WHITE
                 if click:
+                    if self.play_sound:
+                        self.click_sound.play()
                     self.custom_maze()
                     click = False
             
             if button_5.collidepoint((mx, my)):
                 button5_border = WHITE
                 if click:
+                    if self.play_sound:
+                        self.click_sound.play()
                     pygame.quit()
                     sys.exit()
 
@@ -139,11 +217,11 @@ class Agneepath:
             pygame.draw.rect(self.win, BUTTON, button_5, 0, 30)
             pygame.draw.rect(self.win, button5_border, button_5, 5, 30)
 
-            self.draw_text('PLAY GAME', self.font2, YELLOW, self.win, 245, 207)
-            self.draw_text('STATIC MAZE', self.font2, YELLOW, self.win, 235, 267)
-            self.draw_text('DYNAMIC MAZE', self.font2, YELLOW, self.win, 230, 327)
-            self.draw_text('CUSTOM MAZE', self.font2, YELLOW, self.win, 230, 387)
-            self.draw_text('QUIT', self.font2, YELLOW, self.win, 285, 447)
+            self.draw_text('PLAY GAME', self.font2, YELLOW, self.win, 245, 227)
+            self.draw_text('STATIC MAZE', self.font2, YELLOW, self.win, 235, 287)
+            self.draw_text('DYNAMIC MAZE', self.font2, YELLOW, self.win, 230, 347)
+            self.draw_text('CUSTOM MAZE', self.font2, YELLOW, self.win, 230, 407)
+            self.draw_text('QUIT', self.font2, YELLOW, self.win, 285, 467)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -232,6 +310,7 @@ class Agneepath:
                         run = False
                         return
                     if event.type == pygame.KEYDOWN:
+                        self.click_sound.play()
                         if event.key==pygame.K_LEFT:
                             if not grid[dragon.row - 1][dragon.col].is_wall and not grid[dragon.row - 1][dragon.col].is_end:
                                 dragon.reset()
@@ -275,7 +354,8 @@ class Agneepath:
                 return
             else:
                 if dragon in self.start_list:
-                    caught += 1 
+                    caught += 1
+                    self.eat_sound.play()
                     for i, start in enumerate(self.start_list):
                         if dragon == start and self.path_obj_dict and 'man_%s' %i in self.path_obj_dict:
                             for spot in self.path_obj_dict['man_%s' %i][2]:
@@ -581,6 +661,7 @@ class Agneepath:
                     if event.type == pygame.QUIT:
                         run = False
                     if pygame.mouse.get_pressed()[0]: # LEFT
+                        self.click_sound.play()
                         pos = pygame.mouse.get_pos()
                         row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
                         spot = grid[row][col]
@@ -595,6 +676,7 @@ class Agneepath:
                             prev_barrier_count += 1
                             spot.make_barrier()
                     elif pygame.mouse.get_pressed()[2]: # RIGHT
+                        self.click_sound.play()
                         pos = pygame.mouse.get_pos()
                         row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
                         spot = grid[row][col]
@@ -610,6 +692,7 @@ class Agneepath:
                             if spot not in self.start_list and spot not in self.end_list:
                                 spot.reset()
                     if event.type == pygame.KEYDOWN:
+                        self.click_sound.play()
                         if event.key == pygame.K_ESCAPE:
                             run = False
                             update_path = False
@@ -663,6 +746,7 @@ class Agneepath:
                                     start.reset()
                                 start = _path_obj[2].pop(0)
                                 start.make_start()
+                                self.footstep_sound.play()
                                 self.start_list[i] = start
                             delay = True
                             count = COUNT
