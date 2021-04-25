@@ -5,7 +5,7 @@ import sys
 import copy
 import threading
 import random
-from datetime import datetime
+import datetime
 
 from lib.grid import Spot
 from lib.operations import *
@@ -191,17 +191,39 @@ class Agneepath:
                 j += 1
             i += 1
         
-        start = grid[1][0]
-        start.make_start()
-        end = grid[19][18]
-        end.make_end()
-        dragon = grid[10][9]
-        dragon.make_dragon()
-        astar_path = False
-        find_path = False
+        self.start_list = []
+        self.end_list = []
+        while len(self.start_list) < self.start_count:
+            row = random.randint(0,10)
+            col = random.randint(0,10)
+            spot = grid[row][col]
+            if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
+                spot.make_start()
+                self.start_list.append(spot)
+
+        while len(self.end_list) < self.end_count:
+            row = random.randint(10,19)
+            col = random.randint(10,19)
+            spot = grid[row][col]
+            if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
+                spot.make_end()
+                self.end_list.append(spot)
+        dragon = False
+        while not dragon:
+            row = random.randint(0,19)
+            col = random.randint(0,19)
+            spot = grid[row][col]
+            if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
+                dragon = spot
+                dragon.make_dragon()
+
+        self.path_obj_dict = {}
         run = True
+        update_path = False
+        barrier_count = prev_barrier_count = get_barrier_count(grid)
         count = COUNT
         delay = False
+        caught = 0
         while run:
             draw(self.win, grid, TOTAL_ROWS, WIDTH)
             if count > 0:
@@ -213,77 +235,94 @@ class Agneepath:
                         if event.key==pygame.K_LEFT:
                             if not grid[dragon.row - 1][dragon.col].is_wall and not grid[dragon.row - 1][dragon.col].is_end:
                                 dragon.reset()
-                                if dragon == start:
-                                    start = None
                                 dragon = grid[dragon.row -1][dragon.col]
                                 dragon.make_dragon()
                         elif event.key==pygame.K_UP:
                             if not grid[dragon.row][dragon.col - 1].is_wall and not grid[dragon.row][dragon.col - 1].is_end:
                                 dragon.reset()
-                                if dragon == start:
-                                    start = None
                                 dragon = grid[dragon.row][dragon.col - 1]
                                 dragon.make_dragon()
                         elif event.key==pygame.K_RIGHT:
                             if not grid[dragon.row + 1][dragon.col].is_wall and not grid[dragon.row + 1][dragon.col].is_end:
                                 dragon.reset()
-                                if dragon == start:
-                                    start = None
                                 dragon = grid[dragon.row + 1][dragon.col]
                                 dragon.make_dragon()
                         elif event.key==pygame.K_DOWN:
                             if not grid[dragon.row][dragon.col + 1].is_wall and not grid[dragon.row][dragon.col + 1].is_end:
                                 dragon.reset()
-                                if dragon == start:
-                                    start = None
                                 dragon = grid[dragon.row][dragon.col + 1]
                                 dragon.make_dragon()
                         elif event.key == pygame.K_ESCAPE:
                             run = False
-                            return
-                        elif event.key == pygame.K_SPACE and start and end:
-                            find_path = True
+                        elif event.key == pygame.K_SPACE and len(self.start_list) == self.start_count and len(self.end_list) == self.end_count and dragon:
+                            update_path = True
                             count = 0
                 if delay:
                     count -=1
-            elif start == dragon:
+            elif not self.start_list:
                 delay = False
-                for spot in astar_path:
-                    if not spot.is_dragon:
-                        spot.reset()
-                find_path = False
                 count = COUNT
-                pygame.draw.rect(self.win, BUTTON, pygame.Rect(170, 215, 230, 80), 0, 30)
-                pygame.draw.rect(self.win, BUTTON_BORDER, pygame.Rect(170, 215, 230, 80), 5, 30)
-                self.draw_text('YOU ARE CAUGHT!!!', self.font3, BLACK, self.win, 205, 225)
+                pygame.draw.rect(self.win, BUTTON, pygame.Rect(175, 215, 240, 80), 0, 30)
+                pygame.draw.rect(self.win, BUTTON_BORDER, pygame.Rect(175, 215, 240, 80), 5, 30)
+                if caught:
+                    self.draw_text('YOU CAUGHT %s PREY!!!' %caught, self.font3, BLACK, self.win, 205, 225)
+                else:
+                    self.draw_text('ALL PREY WENT HOME', self.font3, BLACK, self.win, 205, 225)
                 self.draw_text('GOING TO MAIN MENU.', self.font3, BLACK, self.win, 200, 255)
                 pygame.display.update()
                 time.sleep(5)
                 run = False
                 return
             else:
-                if find_path:
+                if dragon in self.start_list:
+                    caught += 1 
+                    for i, start in enumerate(self.start_list):
+                        if dragon == start and self.path_obj_dict and 'man_%s' %i in self.path_obj_dict:
+                            for spot in self.path_obj_dict['man_%s' %i][2]:
+                                if not spot.is_barrier and not spot.is_dragon:
+                                    spot.reset()
+                    self.start_list = [start for start in self.start_list if start != dragon]
+                    dragon.is_start = False
+                if update_path:
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
-                    astar_path = algorithm(lambda: draw(self.win, grid, TOTAL_ROWS, WIDTH), grid, end, start)
-                    find_path = False
-                if astar_path:
-                    if len([spot for spot in astar_path if spot.is_dragon]) > 0:
-                        for spot in astar_path:
-                            if not spot.is_dragon:
-                                spot.reset()
-                        find_path = True
-                    if not find_path:
-                        if start in astar_path:
+                    threads = []
+                    for i, start in enumerate(self.start_list):
+                        if self.path_obj_dict and 'man_%s' %i in self.path_obj_dict:
+                            for spot in self.path_obj_dict['man_%s' %i][2]:
+                                if not spot.is_barrier and not spot.is_dragon:
+                                    spot.reset()
+                        self.path_obj_dict['man_%s' %i] = [start, self.end_list, False]
+                        t = threading.Thread(target=self.solve, args=('man_%s' %i, grid))
+                        t.start()
+                        threads.append(t)
+                    for t in threads:
+                        t.join()
+                    update_path = False
+                if self.start_list and self.path_obj_dict:
+                    for i, start in enumerate(self.start_list):
+                        _path_obj = self.path_obj_dict['man_%s' %i]
+                        if not len(_path_obj[2]):
                             start.reset()
-                            start = astar_path.pop(start)
-                            start.make_start()
+                            print('Man %s has reached' %i)
+                            self.start_list.pop(i)
+                        if len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
+                            update_path = True
+                        if barrier_count < prev_barrier_count:
+                            prev_barrier_count = barrier_count
+                            update_path = True
+                        if not update_path and len(_path_obj[2]) > 0:
+                            if not _path_obj[2][0].is_start:
+                                if start.is_intersection:
+                                    start.reset()
+                                    start.make_path()
+                                else:
+                                    start.reset()
+                                start = _path_obj[2].pop(0)
+                                start.make_start()
+                                self.start_list[i] = start
                             delay = True
-                            count = COUNT
-                        if start is end:
-                            end.make_end()
-                            delay = False
                             count = COUNT
 
     def static_maze(self):
@@ -299,59 +338,105 @@ class Agneepath:
                 j += 1
             i += 1
         
-        start_list = []
-        end_list = []
-        while len(start_list) <= self.start_count:
+        self.start_list = []
+        self.end_list = []
+        while len(self.start_list) < self.start_count:
             row = random.randint(0,19)
             col = random.randint(0,19)
             spot = grid[row][col]
-
             if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
                 spot.make_start()
-                start_list.append(spot)
+                self.start_list.append(spot)
 
-        while len(end_list) <= self.end_count:
+        while len(self.end_list) < self.end_count:
             row = random.randint(0,19)
             col = random.randint(0,19)
             spot = grid[row][col]
-
             if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
                 spot.make_end()
-                end_list.append(spot)
+                self.end_list.append(spot)
 
-        astar_path = False
-        find_path = False
+        self.path_obj_dict = {}
         run = True
-        solve_flag = True
+        update_path = False
+        barrier_count = prev_barrier_count = get_barrier_count(grid)
+        count = COUNT
+        delay = False
         while run:
             draw(self.win, grid, TOTAL_ROWS, WIDTH)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+            if count > 0:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
+
+                    if pygame.mouse.get_pressed()[0]: # LEFT
+                        pos = pygame.mouse.get_pos()
+                        row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
+                        spot = grid[row][col]
+                        if not spot.is_end and not spot.is_start and not spot.is_wall:
+                            barrier_count += 1
+                            prev_barrier_count += 1
+                            spot.make_barrier()
+                    elif pygame.mouse.get_pressed()[2]: # RIGHT
+                        pos = pygame.mouse.get_pos()
+                        row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
+                        spot = grid[row][col]
+                        if spot.is_barrier and not spot.is_end and not spot.is_start and not spot.is_wall:
+                            barrier_count -= 1
+                            spot.reset()
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            run = False
+                            update_path = False
+                        if event.key == pygame.K_SPACE and len(self.start_list) == self.start_count and len(self.end_list) == self.end_count:
+                            update_path = True
+                            delay = True
+                if delay:
+                    count -=1
+            else:
+                if update_path:
+                    for row in grid:
+                        for spot in row:
+                            spot.update_neighbors(grid)
+                    threads = []
+                    for i, start in enumerate(self.start_list):
+                        if self.path_obj_dict and 'man_%s' %i in self.path_obj_dict:
+                            for spot in self.path_obj_dict['man_%s' %i][2]:
+                                if not spot.is_barrier:
+                                    spot.reset()
+                        self.path_obj_dict['man_%s' %i] = [start, self.end_list, False]
+                        t = threading.Thread(target=self.solve, args=('man_%s' %i, grid))
+                        t.start()
+                        threads.append(t)
+                    for t in threads:
+                        t.join()
+                    update_path = False
+                if not self.start_list:
                     run = False
-                    solve_flag = False
-
-                if pygame.mouse.get_pressed()[0]: # LEFT
-                    pos = pygame.mouse.get_pos()
-                    row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
-                    spot = grid[row][col]
-                    if not spot.is_end and not spot.is_start and not spot.is_wall:
-                        spot.make_barrier()
-
-                elif pygame.mouse.get_pressed()[2]: # RIGHT
-                    pos = pygame.mouse.get_pos()
-                    row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
-                    spot = grid[row][col]
-                    if not spot.is_end and not spot.is_start:
-                        spot.reset()
-                        
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        run = False
-                        solve_flag = False
-                    if event.key == pygame.K_SPACE and len(start_list) == self.start_count and len(end_list) == self.end_count:
-                        solve_flag = True
-                        run = False
-            
+                if self.start_list and self.path_obj_dict:
+                    for i, start in enumerate(self.start_list):
+                        _path_obj = self.path_obj_dict['man_%s' %i]
+                        if not len(_path_obj[2]):
+                            start.reset()
+                            print('Man %s has reached' %i)
+                            self.start_list.pop(i)
+                        if len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
+                            update_path = True
+                        if barrier_count < prev_barrier_count:
+                            prev_barrier_count = barrier_count
+                            update_path = True
+                        if not update_path and len(_path_obj[2]) > 0:
+                            if not _path_obj[2][0].is_start:
+                                if start.is_intersection:
+                                    start.reset()
+                                    start.make_path()
+                                else:
+                                    start.reset()
+                                start = _path_obj[2].pop(0)
+                                start.make_start()
+                                self.start_list[i] = start
+                            delay = True
+                            count = COUNT            
 
     def dynamic_maze(self):
         grid = make_grid(TOTAL_ROWS, WIDTH)
@@ -366,20 +451,32 @@ class Agneepath:
                 j += 1
             i += 1
         
-        grid[1][0].make_start()
-        grid[19][18].make_end()
+        self.start_list = []
+        self.end_list = []
+        while len(self.start_list) < self.start_count:
+            row = random.randint(0,19)
+            col = random.randint(0,19)
+            spot = grid[row][col]
+            if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
+                spot.make_start()
+                self.start_list.append(spot)
 
-        start = grid[1][0]
-        end = grid[19][18]
-        astar_path = False
-        find_path = False
+        while len(self.end_list) < self.end_count:
+            row = random.randint(0,19)
+            col = random.randint(0,19)
+            spot = grid[row][col]
+            if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
+                spot.make_end()
+                self.end_list.append(spot)
+        
+        self.path_obj_dict = {}
         run = True
+        update_path = False
+        barrier_count = prev_barrier_count = get_barrier_count(grid)
         count = COUNT
         delay = False
-        delta = 1
-        auto_add = False
-        dyn_bar_pos = copy.deepcopy(DYN_BAR_POS)
-        barrier_count = prev_barrier_count = get_barrier_count(grid)
+        delta = 0.5
+        add_barrier = False
         while run:
             draw(self.win, grid, TOTAL_ROWS, WIDTH)
             if count > 0:
@@ -391,41 +488,64 @@ class Agneepath:
                         if event.key == pygame.K_ESCAPE:
                             run = False
                             return
-                        if event.key == pygame.K_SPACE and start and end:
-                            find_path = True
+                        if event.key == pygame.K_SPACE and len(self.start_list) == self.start_count and len(self.end_list) == self.end_count:
                             dyn_time = datetime.datetime.now() + datetime.timedelta(seconds = delta)
-                            auto_add = True
-                            count = 0
+                            add_barrier = True
+                            update_path = True
+                            delay = True
+                if add_barrier:
+                    if dyn_time <= datetime.datetime.now():
+                        dyn_time = datetime.datetime.now() + datetime.timedelta(seconds = delta)
+                        row = random.randint(0,19)
+                        col = random.randint(0,19)
+                        spot = grid[row][col]
+                        if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_dragon and not spot.is_wall:
+                            spot.make_barrier()
                 if delay:
                     count -=1
             else:
-                if len(dyn_bar_pos) > 0 and auto_add:
-                    if dyn_time <= datetime.datetime.now():
-                        dyn_time = datetime.datetime.now() + datetime.timedelta(seconds = delta)
-                        pos = dyn_bar_pos.pop(0)
-                        grid[pos[0]][pos[1]].make_barrier()
-                if find_path:
+                if update_path:
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
-                    astar_path = algorithm(lambda: draw(self.win, grid, TOTAL_ROWS, WIDTH), grid, end, start)
-                    find_path = False
-                if astar_path:
-                    if len([spot for spot in astar_path if spot.is_barrier]) > 0:
-                        for spot in astar_path:
-                            if not spot.is_barrier:
-                                spot.reset()
-                        find_path = True
-                    if not find_path:
-                        if start in astar_path:
+                    threads = []
+                    for i, start in enumerate(self.start_list):
+                        if self.path_obj_dict and 'man_%s' %i in self.path_obj_dict:
+                            for spot in self.path_obj_dict['man_%s' %i][2]:
+                                if not spot.is_barrier:
+                                    spot.reset()
+                        self.path_obj_dict['man_%s' %i] = [start, self.end_list, False]
+                        t = threading.Thread(target=self.solve, args=('man_%s' %i, grid))
+                        t.start()
+                        threads.append(t)
+                    for t in threads:
+                        t.join()
+                    update_path = False
+                if not self.start_list:
+                    run = False
+                if self.start_list and self.path_obj_dict:
+                    for i, start in enumerate(self.start_list):
+                        _path_obj = self.path_obj_dict['man_%s' %i]
+                        if not len(_path_obj[2]):
                             start.reset()
-                            start = astar_path.pop(start)
-                            start.make_start()
+                            print('Man %s has reached' %i)
+                            self.start_list.pop(i)
+                        if len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
+                            update_path = True
+                        if barrier_count < prev_barrier_count:
+                            prev_barrier_count = barrier_count
+                            update_path = True
+                        if not update_path and len(_path_obj[2]) > 0:
+                            if not _path_obj[2][0].is_start:
+                                if start.is_intersection:
+                                    start.reset()
+                                    start.make_path()
+                                else:
+                                    start.reset()
+                                start = _path_obj[2].pop(0)
+                                start.make_start()
+                                self.start_list[i] = start
                             delay = True
-                            count = COUNT
-                        if start is end:
-                            end.make_end()
-                            delay = False
                             count = COUNT
 
     def solve(self, name, grid):
@@ -436,7 +556,11 @@ class Agneepath:
         for end in end_list:
             _path = algorithm(grid, end, start)
             astar_paths.append(_path)
+        try:
             astar_path = sorted(astar_paths, key=len)[0]
+        except Exception as exp:
+            print(exp)
+            astar_path = False
         color_path(astar_path, lambda: draw(self.win, grid, TOTAL_ROWS, WIDTH))
         self.path_obj_dict[name] = [start, end_list, astar_path]
 
@@ -523,7 +647,7 @@ class Agneepath:
                         _path_obj = self.path_obj_dict['man_%s' %i]
                         if not len(_path_obj[2]):
                             start.reset()
-                            print('Man has reached')
+                            print('Man %s has reached' %i)
                             self.start_list.pop(i)
                         if len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
                             update_path = True
