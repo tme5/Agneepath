@@ -47,8 +47,8 @@ class Agneepath:
         no_music_icon = pygame.image.load(NO_MUSIC_ICON).convert()
         textbox1_active = False
         textbox2_active = False
-        user_input1 = '2'
-        user_input2 = '3'
+        user_input1 = '1'
+        user_input2 = '1'
         self.start_count = int(user_input1)
         self.end_count = int(user_input2)
         self.music = pygame.mixer.music.load(BG_MUSIC)
@@ -532,35 +532,23 @@ class Agneepath:
 
     def dynamic_maze(self):
         grid = make_grid(TOTAL_ROWS, WIDTH)
-        with open(MAZE_CONF, 'r') as f:
-            f_rd = f.readlines()
-        i = 0
-        for ln in f_rd:
-            j = 0
-            for conf in ln.split(','):
-                if int(conf):
-                    grid[j][i].make_wall()
-                j += 1
-            i += 1
-        
+        self.obst_1 = []
+        self.obst_2 = []
+        self.obst_3 = []
+        self.obst_4 = []
+        for i in range(4):
+            self.obst_1.append(grid[4][i])
+            grid[4][i].make_wall()
+            self.obst_2.append(grid[19-i][4])
+            grid[19-i][4].make_wall()
+            self.obst_3.append(grid[14][19-i])
+            grid[14][19-i].make_wall()
+            self.obst_4.append(grid[i][15])
+            grid[i][15].make_wall()
+            
         self.start_list = []
         self.end_list = []
-        while len(self.start_list) < self.start_count:
-            row = random.randint(0,19)
-            col = random.randint(0,19)
-            spot = grid[row][col]
-            if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
-                spot.make_start()
-                self.start_list.append(spot)
-
-        while len(self.end_list) < self.end_count:
-            row = random.randint(0,19)
-            col = random.randint(0,19)
-            spot = grid[row][col]
-            if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
-                spot.make_end()
-                self.end_list.append(spot)
-        
+        reverse_1 = reverse_2 = reverse_3 = reverse_4 = True
         self.path_obj_dict = {}
         run = True
         update_path = False
@@ -569,6 +557,7 @@ class Agneepath:
         delay = False
         delta = 0.5
         add_barrier = False
+        dyn_time = datetime.datetime.now() + datetime.timedelta(seconds = delta)
         while run:
             draw(self.win, grid, TOTAL_ROWS, WIDTH)
             if count > 0:
@@ -585,14 +574,140 @@ class Agneepath:
                             add_barrier = True
                             update_path = True
                             delay = True
-                if add_barrier:
-                    if dyn_time <= datetime.datetime.now():
-                        dyn_time = datetime.datetime.now() + datetime.timedelta(seconds = delta)
-                        row = random.randint(0,19)
-                        col = random.randint(0,19)
+                    if pygame.mouse.get_pressed()[0]: # LEFT
+                        if self.play_sound:
+                            self.click_sound.play()
+                        pos = pygame.mouse.get_pos()
+                        row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
                         spot = grid[row][col]
-                        if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_dragon and not spot.is_wall:
+                        if not update_path and len(self.start_list) != int(self.start_count) and not spot.is_end and not spot.is_start:
+                            spot.make_start()
+                            self.start_list.append(spot)
+                        elif not update_path and len(self.end_list) != int(self.end_count) and not spot.is_start and not spot.is_end:
+                            spot.make_end()
+                            self.end_list.append(spot)
+                        elif not spot.is_end and not spot.is_start and not spot.is_wall:
+                            barrier_count += 1
+                            prev_barrier_count += 1
                             spot.make_barrier()
+                    elif pygame.mouse.get_pressed()[2]: # RIGHT
+                        if self.play_sound:
+                            self.click_sound.play()
+                        pos = pygame.mouse.get_pos()
+                        row, col = get_clicked_pos(pos, TOTAL_ROWS, WIDTH)
+                        spot = grid[row][col]
+                        if spot.is_barrier:
+                            barrier_count -= 1
+                        if not update_path: 
+                            spot.reset()
+                            if spot in self.start_list:
+                                self.start_list = [start for start in self.start_list if not spot.is_start]
+                            if spot in self.end_list:
+                                self.end_list = [end for end in self.end_list if not spot.is_end]
+                        else:
+                            if spot not in self.start_list and spot not in self.end_list:
+                                spot.reset()
+                if dyn_time <= datetime.datetime.now():
+                    dyn_time = datetime.datetime.now() + datetime.timedelta(seconds = delta)
+                    if reverse_1:
+                        if self.obst_1[-1].col < 19:
+                            nxt = grid[self.obst_1[-1].row][self.obst_1[-1].col+1]
+                            if nxt.is_end or nxt.is_wall or nxt.is_barrier:
+                                reverse_1 = False
+                            else:
+                                for i, obs in reversed(list(enumerate(self.obst_1))):
+                                    obs.reset()
+                                    grid[obs.row][obs.col + 1].make_wall()
+                                    self.obst_1[i] = grid[obs.row][obs.col + 1]
+                        else:
+                            reverse_1 = False
+                    else:
+                        if self.obst_1[0].col > 0:
+                            nxt = grid[self.obst_1[0].row][self.obst_1[0].col-1]
+                            if nxt.is_end or nxt.is_wall or nxt.is_barrier:
+                                reverse_1= True
+                            else:
+                                for i, obs in enumerate(self.obst_1):
+                                    obs.reset()
+                                    grid[obs.row][obs.col - 1].make_wall()
+                                    self.obst_1[i] = grid[obs.row][obs.col - 1]
+                        else:
+                            reverse_1 = True
+                    
+                    if reverse_3:
+                        if self.obst_3[-1].col > 0:
+                            nxt = grid[self.obst_3[-1].row][self.obst_3[-1].col-1]
+                            if nxt.is_end or nxt.is_wall or nxt.is_barrier:
+                                reverse_3 = False
+                            else:
+                                for i, obs in reversed(list(enumerate(self.obst_3))):
+                                    obs.reset()
+                                    grid[obs.row][obs.col - 1].make_wall()
+                                    self.obst_3[i] = grid[obs.row][obs.col - 1]
+                        else:
+                            reverse_3 = False
+                    else:
+                        if self.obst_3[0].col < 19:
+                            nxt = grid[self.obst_3[0].row][self.obst_3[0].col+1]
+                            if nxt.is_end or nxt.is_wall or nxt.is_barrier:
+                                reverse_3 = True
+                            else:
+                                for i, obs in enumerate(self.obst_3):
+                                    obs.reset()
+                                    grid[obs.row][obs.col + 1].make_wall()
+                                    self.obst_3[i] = grid[obs.row][obs.col + 1]
+                        else:
+                            reverse_3 = True
+
+                    if reverse_2:
+                        if self.obst_2[-1].row > 0:
+                            nxt = grid[self.obst_2[-1].row-1][self.obst_2[-1].col]
+                            if nxt.is_end or nxt.is_wall or nxt.is_barrier:
+                                reverse_2 = False
+                            else:
+                                for i, obs in reversed(list(enumerate(self.obst_2))):
+                                    obs.reset()
+                                    grid[obs.row-1][obs.col].make_wall()
+                                    self.obst_2[i] = grid[obs.row-1][obs.col]
+                        else:
+                            reverse_2 = False
+                    else:
+                        if self.obst_2[0].row < 19:
+                            nxt = grid[self.obst_2[-1].row-1][self.obst_2[-1].col]
+                            if nxt.is_end or nxt.is_wall or nxt.is_barrier:
+                                reverse_2 = True
+                            else:
+                                for i, obs in enumerate(self.obst_2):
+                                    obs.reset()
+                                    grid[obs.row+1][obs.col].make_wall()
+                                    self.obst_2[i] = grid[obs.row+1][obs.col]
+                        else:
+                            reverse_2 = True
+                    
+                    if reverse_4:
+                        if self.obst_4[-1].row < 19:
+                            nxt = grid[self.obst_4[-1].row+1][self.obst_4[-1].col]
+                            if nxt.is_end or nxt.is_wall or nxt.is_barrier:
+                                reverse_4 = False
+                            else:
+                                for i, obs in reversed(list(enumerate(self.obst_4))):
+                                    obs.reset()
+                                    grid[obs.row+1][obs.col].make_wall()
+                                    self.obst_4[i] = grid[obs.row+1][obs.col]
+                        else:
+                            reverse_4 = False
+                    else:
+                        if self.obst_4[0].row > 0:
+                            nxt = grid[self.obst_4[0].row-1][self.obst_4[0].col]
+                            if nxt.is_end or nxt.is_wall or nxt.is_barrier:
+                                reverse_4 = True
+                            else:
+                                for i, obs in enumerate(self.obst_4):
+                                    obs.reset()
+                                    grid[obs.row-1][obs.col].make_wall()
+                                    self.obst_4[i] = grid[obs.row-1][obs.col]
+                        else:
+                            reverse_4 = True
                 if delay:
                     count -=1
             else:
@@ -622,13 +737,13 @@ class Agneepath:
                             start.reset()
                             print('Man %s has reached' %i)
                             self.start_list.pop(i)
-                        if len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
+                        if len([spot for spot in _path_obj[2] if spot.is_wall]) > 0 or len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
                             update_path = True
                         if barrier_count < prev_barrier_count:
                             prev_barrier_count = barrier_count
                             update_path = True
                         if not update_path and len(_path_obj[2]) > 0:
-                            if not _path_obj[2][0].is_start:
+                            if not _path_obj[2][0].is_start and not _path_obj[2][0].is_wall:
                                 if start.is_intersection:
                                     start.reset()
                                     start.make_path()

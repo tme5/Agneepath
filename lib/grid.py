@@ -31,6 +31,7 @@ class Spot:
         self.is_barrier = False
         self.is_intersection = False
         self.is_path = False
+        self.is_wall = False
         self.color = TILE
 
     def make_start(self):
@@ -45,9 +46,6 @@ class Spot:
         self.is_barrier = True
 
     def make_wall(self):
-        self.is_dragon = False
-        self.is_path = False
-        self.is_barrier = False
         self.is_wall = True
         
     def make_end(self):

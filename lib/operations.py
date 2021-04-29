@@ -40,7 +40,7 @@ def algorithm(grid, start, end):
 
         if current == end:
             path = reconstruct_path(came_from, end)
-            end.make_end()
+            #end.make_end()
             return path
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
@@ -84,8 +84,6 @@ def draw(win, grid, rows, width):
             spot.draw(win)
             if spot.is_start:
                 win.blit(man, (spot.x, spot.y))
-            elif spot.is_path:
-                win.blit(path, (spot.x, spot.y))
             elif spot.is_barrier:
                 win.blit(fire, (spot.x, spot.y))
             elif spot.is_end:
@@ -94,6 +92,8 @@ def draw(win, grid, rows, width):
                 win.blit(dragon, (spot.x, spot.y))
             elif spot.is_wall:
                 win.blit(wall, (spot.x, spot.y))
+            elif spot.is_path:
+                win.blit(path, (spot.x, spot.y))
             elif spot.is_intersection:
                 win.blit(intr_section, (spot.x, spot.y))
             else:
