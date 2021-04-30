@@ -40,7 +40,6 @@ def algorithm(grid, start, end):
 
         if current == end:
             path = reconstruct_path(came_from, end)
-            #end.make_end()
             return path
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
@@ -64,9 +63,10 @@ def reconstruct_path(came_from, current):
     return path
 
 def color_path(path, draw):
-    for spot in path:
-        spot.make_path()
-        draw()
+    if path:
+        for spot in path:
+            spot.make_path()
+            draw()
 
 def make_grid(rows, width):
     grid = []

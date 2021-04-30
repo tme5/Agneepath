@@ -47,8 +47,8 @@ class Agneepath:
         no_music_icon = pygame.image.load(NO_MUSIC_ICON).convert()
         textbox1_active = False
         textbox2_active = False
-        user_input1 = '1'
-        user_input2 = '1'
+        user_input1 = '2'
+        user_input2 = '3'
         self.start_count = int(user_input1)
         self.end_count = int(user_input2)
         self.music = pygame.mixer.music.load(BG_MUSIC)
@@ -506,29 +506,33 @@ class Agneepath:
                 if self.start_list and self.path_obj_dict:
                     for i, start in enumerate(self.start_list):
                         _path_obj = self.path_obj_dict['man_%s' %i]
-                        if not len(_path_obj[2]):
-                            start.reset()
-                            print('Man %s has reached' %i)
+                        if not _path_obj[2]:
+                            print('Cannot find path')
                             self.start_list.pop(i)
-                        if len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
-                            update_path = True
-                        if barrier_count < prev_barrier_count:
-                            prev_barrier_count = barrier_count
-                            update_path = True
-                        if not update_path and len(_path_obj[2]) > 0:
-                            if not _path_obj[2][0].is_start:
-                                if start.is_intersection:
-                                    start.reset()
-                                    start.make_path()
-                                else:
-                                    start.reset()
-                                start = _path_obj[2].pop(0)
-                                start.make_start()
-                                if self.play_sound:
-                                    self.footstep_sound.play()
-                                self.start_list[i] = start
-                            delay = True
-                            count = COUNT            
+                        else:
+                            if not len(_path_obj[2]):
+                                start.reset()
+                                print('Man %s has reached' %i)
+                                self.start_list.pop(i)
+                            if len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
+                                update_path = True
+                            if barrier_count < prev_barrier_count:
+                                prev_barrier_count = barrier_count
+                                update_path = True
+                            if not update_path and len(_path_obj[2]) > 0:
+                                if not _path_obj[2][0].is_start:
+                                    if start.is_intersection:
+                                        start.reset()
+                                        start.make_path()
+                                    else:
+                                        start.reset()
+                                    start = _path_obj[2].pop(0)
+                                    start.make_start()
+                                    if self.play_sound:
+                                        self.footstep_sound.play()
+                                    self.start_list[i] = start
+                                delay = True
+                                count = COUNT
 
     def dynamic_maze(self):
         grid = make_grid(TOTAL_ROWS, WIDTH)
@@ -601,14 +605,20 @@ class Agneepath:
                         if not update_path: 
                             spot.reset()
                             if spot in self.start_list:
-                                self.start_list = [start for start in self.start_list if not spot.is_start]
+                                self.start_list = [start for start in self.start_list if start != spot]
                             if spot in self.end_list:
-                                self.end_list = [end for end in self.end_list if not spot.is_end]
+                                self.end_list = [end for end in self.end_list if end != spot]
                         else:
                             if spot not in self.start_list and spot not in self.end_list:
                                 spot.reset()
                 if dyn_time <= datetime.datetime.now():
                     dyn_time = datetime.datetime.now() + datetime.timedelta(seconds = delta)
+                    row = random.randint(0,19)
+                    col = random.randint(0,19)
+                    if not row in [4,15] and not col in [4,15]:
+                        spot = grid[row][col]
+                        if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_wall:
+                            spot.make_barrier()
                     if reverse_1:
                         if self.obst_1[-1].col < 19:
                             nxt = grid[self.obst_1[-1].row][self.obst_1[-1].col+1]
@@ -768,7 +778,6 @@ class Agneepath:
         try:
             astar_path = sorted(astar_paths, key=len)[0]
         except Exception as exp:
-            print(exp)
             astar_path = False
         color_path(astar_path, lambda: draw(self.win, grid, TOTAL_ROWS, WIDTH))
         self.path_obj_dict[name] = [start, end_list, astar_path]
@@ -816,9 +825,9 @@ class Agneepath:
                         if not update_path: 
                             spot.reset()
                             if spot in self.start_list:
-                                self.start_list = [start for start in self.start_list if not spot.is_start]
+                                self.start_list = [start for start in self.start_list if start != spot]
                             if spot in self.end_list:
-                                self.end_list = [end for end in self.end_list if not spot.is_end]
+                                self.end_list = [end for end in self.end_list if end != spot]
                         else:
                             if spot not in self.start_list and spot not in self.end_list:
                                 spot.reset()
@@ -860,29 +869,33 @@ class Agneepath:
                 if self.start_list and self.path_obj_dict:
                     for i, start in enumerate(self.start_list):
                         _path_obj = self.path_obj_dict['man_%s' %i]
-                        if not len(_path_obj[2]):
-                            start.reset()
-                            print('Man %s has reached' %i)
+                        if not _path_obj[2]:
+                            print('Cannot find path')
                             self.start_list.pop(i)
-                        if len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
-                            update_path = True
-                        if barrier_count < prev_barrier_count:
-                            prev_barrier_count = barrier_count
-                            update_path = True
-                        if not update_path and len(_path_obj[2]) > 0:
-                            if not _path_obj[2][0].is_start:
-                                if start.is_intersection:
-                                    start.reset()
-                                    start.make_path()
-                                else:
-                                    start.reset()
-                                start = _path_obj[2].pop(0)
-                                start.make_start()
-                                if self.play_sound:
-                                    self.footstep_sound.play()
-                                self.start_list[i] = start
-                            delay = True
-                            count = COUNT
+                        else:
+                            if not len(_path_obj[2]):
+                                start.reset()
+                                print('Man %s has reached' %i)
+                                self.start_list.pop(i)
+                            if len([spot for spot in _path_obj[2] if spot.is_barrier]) > 0 or len([spot for spot in _path_obj[2] if spot.is_dragon]) > 0:
+                                update_path = True
+                            if barrier_count < prev_barrier_count:
+                                prev_barrier_count = barrier_count
+                                update_path = True
+                            if not update_path and len(_path_obj[2]) > 0:
+                                if not _path_obj[2][0].is_start:
+                                    if start.is_intersection:
+                                        start.reset()
+                                        start.make_path()
+                                    else:
+                                        start.reset()
+                                    start = _path_obj[2].pop(0)
+                                    start.make_start()
+                                    if self.play_sound:
+                                        self.footstep_sound.play()
+                                    self.start_list[i] = start
+                                delay = True
+                                count = COUNT
 
 if __name__ == '__main__':
     test_obj = Agneepath()
