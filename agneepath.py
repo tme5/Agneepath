@@ -288,8 +288,8 @@ class Agneepath:
                 self.end_list.append(spot)
         dragon = False
         while not dragon:
-            row = random.randint(0,19)
-            col = random.randint(0,19)
+            row = random.randint(10,19)
+            col = random.randint(0,10)
             spot = grid[row][col]
             if not spot.is_start and not spot.is_end and not spot.is_barrier and not spot.is_intersection and not spot.is_dragon and not spot.is_wall:
                 dragon = spot
@@ -507,6 +507,7 @@ class Agneepath:
                     for i, start in enumerate(self.start_list):
                         _path_obj = self.path_obj_dict['man_%s' %i]
                         if not _path_obj[2]:
+                            start.reset()
                             print('Cannot find path')
                             self.start_list.pop(i)
                         else:
@@ -870,6 +871,7 @@ class Agneepath:
                     for i, start in enumerate(self.start_list):
                         _path_obj = self.path_obj_dict['man_%s' %i]
                         if not _path_obj[2]:
+                            start.reset()
                             print('Cannot find path')
                             self.start_list.pop(i)
                         else:
